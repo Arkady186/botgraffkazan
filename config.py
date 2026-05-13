@@ -8,7 +8,7 @@ BASE_DIR = Path(__file__).parent
 DATA_DIR = BASE_DIR / "data"
 MEDIA_DIR = BASE_DIR / "media"
 
-# Создаём директории при импорте
+# Создаём директории при импорте (могут не использоваться, если пути переопределены)
 DATA_DIR.mkdir(exist_ok=True)
 MEDIA_DIR.mkdir(exist_ok=True)
 
@@ -16,8 +16,11 @@ BOT_TOKEN = os.getenv("BOT_TOKEN", "")
 # На Render используем 0.0.0.0 и порт из переменной PORT
 WEB_HOST = os.getenv("WEB_HOST", "0.0.0.0")
 WEB_PORT = int(os.getenv("PORT", os.getenv("WEB_PORT", "8000")))
-DATABASE_PATH = os.getenv("DATABASE_PATH", str(DATA_DIR / "antidrug.db"))
-MEDIA_PATH = os.getenv("MEDIA_PATH", str(MEDIA_DIR))
+# По умолчанию используем /tmp для совместимости с Render
+DATABASE_PATH = os.getenv("DATABASE_PATH", "/tmp/antidrug.db")
+MEDIA_PATH = os.getenv("MEDIA_PATH", "/tmp/media")
+# Создаём директорию для медиа, если её нет
+Path(MEDIA_PATH).mkdir(parents=True, exist_ok=True)
 SECRET_KEY = os.getenv("SECRET_KEY", "dev_secret_key_change_in_production")
 
 # Прокси для Telegram (если нужен)
