@@ -1,0 +1,26 @@
+INFO:     Started server process [20660]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+==================================================
+🛡️  Антинаркотическая комиссия - Казань
+==================================================
+
+📱 Telegram-бот запускается...
+🌐 Веб-панель: http://127.0.0.1:8000
+
+Логины для веб-панели:
+  admin / admin123
+  operator / operator123
+
+Нажмите Ctrl+C для остановки
+==================================================
+🤖 Бот запущен...
+⚠️ Не удалось подключиться к Telegram: TelegramNetworkError
+   Проверьте интернет-соединение и токен бота
+💡 Возможно, требуется прокси. Добавьте TELEGRAM_PROXY в .env
+   Бот продолжит работу и попытается подключиться при polling...
+
+❌ Ошибка бота: HTTP Client says - ClientConnectorError: Cannot connect to host api.telegram.org:443 ssl:default [None]
+Проверьте токен и подключение к интернету
+💡 Возможно, требуется прокси. Добавьте TELEGRAM_PROXY в .env
