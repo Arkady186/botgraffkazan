@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Заявка #{{ report.id }} — граффити · Казань</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/theme.css">
+</head>
+<body>
+    <div class="navbar">
+        <h1>🎨 Учёт граффити · Казань</h1>
+        <div>
+            <a href="/dashboard">Панель</a>
+            <a href="/reports">Заявки</a>
+            <a href="/archive">Архив</a>
+            <a href="/map">Карта</a>
+            <a href="/logout" class="logout">Выход</a>
+        </div>
+    </div>
+    
+    <div class="container">
+        <a href="/reports" class="back-link">← Назад к списку</a>
+        
+        <div class="grid">
+            <div>
+                <div class="card">
+                    <div class="card-header">📋 Информация о заявке</div>
+                    <div class="card-body">
+                        <div class="info-row">
+                            <span class="info-label">ID заявки</span>
+                            <span class="info-value">#{{ report.id }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Статус</span>
+                            <span class="info-value">
+                                <span class="status {{ report.status }}">
+                                    {{ status_labels.get(report.status, report.status) }}
+                                </span>
+                            </span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Координаты</span>
+                            <span class="info-value">{{ report.latitude }}, {{ report.longitude }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Адрес</span>
+                            <span class="info-value">{{ report.address or 'Не указан' }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Описание</span>
+                            <span class="info-value">{{ report.description or 'Нет описания' }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Дата создания</span>
+                            <span class="info-value">{{ report.created_at[:16].replace('T', ' ') }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Обновлено</span>
+                            <span class="info-value">{{ report.updated_at[:16].replace('T', ' ') }}</span>
+                        </div>
+                        
+                        {% if user_info %}
+                        <div class="info-row">
+                            <span class="info-label">Пользователь</span>
+                            <span class="info-value">
+                                {% if user_info.username %}@{{ user_info.username }}{% else %}
+                                {{ user_info.first_name }} {{ user_info.last_name }}{% endif %}
+                                <br><small>{% if user_info.telegram_id is not none and user_info.telegram_id < 0 %}
+                                    VK id: {{- user_info.telegram_id | abs -}}
+                                    {% elif user_info.telegram_id is not none %}
+                                    Telegram ID: {{ user_info.telegram_id }}
+                                    {% endif %}</small>
+                            </span>
+                        </div>
+                        {% else %}
+                        <div class="user-anon">
+                            🔒 Пользователь предпочёл остаться анонимным
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="card" style="margin-top: 20px;">
+                    <div class="card-header">📍 Карта</div>
+                    <div class="card-body">
+                        <div id="map" class="map-preview">
+                            <a href="https://www.openstreetmap.org/?mlat={{ report.latitude }}&mlon={{ report.longitude }}#map=16/{{ report.latitude }}/{{ report.longitude }}" 
+                               target="_blank" class="btn btn-primary">
+                                Открыть в OpenStreetMap
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div>
+                <div class="card">
+                    <div class="card-header">📸 Медиафайлы</div>
+                    <div class="card-body">
+                        {% if media %}
+                        <div class="media-grid">
+                            {% for m in media %}
+                            <div class="media-item">
+                                {% if m.file_type == 'photo' %}
+                                <img src="/media/{{ m.file_path }}" alt="Фото">
+                                {% else %}
+                                <video src="/media/{{ m.file_path }}" controls></video>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <p style="color: #999;">Нет медиафайлов</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="card" style="margin-top: 20px;">
+                    <div class="card-header">⚙️ Изменить статус</div>
+                    <div class="card-body">
+                        <form method="POST" action="/report/{{ report.id }}/status">
+                            <div class="form-group">
+                                <label for="status">Новый статус</label>
+                                <select name="new_status" id="status" required>
+                                    <option value="new" {% if report.status == 'new' %}selected{% endif %}>🆕 Новая</option>
+                                    <option value="in_progress" {% if report.status == 'in_progress' %}selected{% endif %}>⏳ В работе</option>
+                                    <option value="completed" {% if report.status == 'completed' %}selected{% endif %}>✅ Завершена</option>
+                                    <option value="rejected" {% if report.status == 'rejected' %}selected{% endif %}>❌ Отклонена</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="comment">Комментарий (необязательно)</label>
+                                <textarea name="comment" id="comment" placeholder="Введите комментарий для внутренней истории..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Обновить статус</button>
+                        </form>
+                    </div>
+                </div>
+                
+                <div class="card" style="margin-top: 20px;">
+                    <div class="card-header">📜 История изменений</div>
+                    <div class="card-body">
+                        {% if history %}
+                        <ul class="history">
+                            {% for h in history %}
+                            <li class="history-item">
+                                <div class="status-change">
+                                    {% if h.old_status %}
+                                    {{ status_labels.get(h.old_status, h.old_status) }} → 
+                                    {% endif %}
+                                    {{ status_labels.get(h.new_status, h.new_status) }}
+                                </div>
+                                {% if h.comment %}
+                                <div class="comment">💬 {{ h.comment }}</div>
+                                {% endif %}
+                                <div class="time">🕐 {{ h.created_at[:16].replace('T', ' ') }}</div>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        {% else %}
+                        <p style="color: #999;">История пуста</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Подключаем Leaflet для карты
+        const mapContainer = document.getElementById('map');
+        
+        // Загружаем Leaflet через CDN
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+        document.head.appendChild(link);
+        
+        const script = document.createElement('script');
+        script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+        script.onload = () => {
+            const lat = {{ report.latitude }};
+            const lng = {{ report.longitude }};
+            
+            const map = L.map('map').setView([lat, lng], 16);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+            
+            L.marker([lat, lng]).addTo(map)
+                .bindPopup('📍 Заявка #{{ report.id }}')
+                .openPopup();
+        };
+        document.head.appendChild(script);
+    </script>
+</body>
+</html>

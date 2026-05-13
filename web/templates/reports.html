@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Заявки — граффити · Казань</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/theme.css">
+</head>
+<body>
+    <div class="navbar">
+        <h1>🎨 Учёт граффити · Казань</h1>
+        <div>
+            <a href="/dashboard">Панель</a>
+            <a href="/reports">Заявки</a>
+            <a href="/archive">Архив</a>
+            <a href="/map">Карта</a>
+            <a href="/logout" class="logout">Выход</a>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="content">
+            <div class="content-header">
+                <h2>Все заявки</h2>
+                <div class="filters">
+                    <a href="/reports?status_filter=all" 
+                       class="filter-btn {% if current_filter == 'all' %}active{% endif %}">
+                        Все
+                    </a>
+                    <a href="/reports?status_filter=new" 
+                       class="filter-btn {% if current_filter == 'new' %}active{% endif %}">
+                        🆕 Новые
+                    </a>
+                    <a href="/reports?status_filter=in_progress" 
+                       class="filter-btn {% if current_filter == 'in_progress' %}active{% endif %}">
+                        ⏳ В работе
+                    </a>
+                    <a href="/reports?status_filter=completed" 
+                       class="filter-btn {% if current_filter == 'completed' %}active{% endif %}">
+                        ✅ Завершено
+                    </a>
+                    <a href="/reports?status_filter=rejected" 
+                       class="filter-btn {% if current_filter == 'rejected' %}active{% endif %}">
+                        ❌ Отклонено
+                    </a>
+                </div>
+            </div>
+            
+            {% if reports %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Координаты</th>
+                        <th>Адрес</th>
+                        <th>Описание</th>
+                        <th>Медиа</th>
+                        <th>Статус</th>
+                        <th>Дата</th>
+                        <th>Действие</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for report in reports %}
+                    <tr>
+                        <td>#{{ report.id }}</td>
+                        <td class="coords">{{ report.latitude }}, {{ report.longitude }}</td>
+                        <td>{{ report.address or 'Не указан' }}</td>
+                        <td>{{ (report.description or '-')[:50] }}{% if report.description and report.description|length > 50 %}...{% endif %}</td>
+                        <td>
+                            {% if report.media %}
+                            <div class="media-preview">
+                                {% for m in report.media[:3] %}
+                                    {% if m.file_type == 'photo' %}
+                                    <img src="/media/{{ m.file_path }}" alt="foto">
+                                    {% else %}
+                                    <video src="/media/{{ m.file_path }}"></video>
+                                    {% endif %}
+                                {% endfor %}
+                                {% if report.media|length > 3 %}
+                                <span style="font-size: 12px; color: #666;">+{{ report.media|length - 3 }}</span>
+                                {% endif %}
+                            </div>
+                            {% else %}
+                            -
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="status {{ report.status }}">
+                                {{ status_labels.get(report.status, report.status) }}
+                            </span>
+                        </td>
+                        <td>{{ report.created_at[:16].replace('T', ' ') }}</td>
+                        <td>
+                            <a href="/report/{{ report.id }}" class="btn btn-primary btn-sm">
+                                Просмотр
+                            </a>
+                            <form method="POST" action="/report/{{ report.id }}/delete" style="display:inline;" onsubmit="return confirm('Вы уверены, что хотите удалить заявку #{{ report.id }}? Она будет перемещена в архив на 30 дней.')">
+                                <button type="submit" class="btn btn-danger btn-sm">
+                                    🗑️ Удалить
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="no-data">
+                <p>📭 Заявок не найдено</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

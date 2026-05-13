@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход · учёт граффити, Казань</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/theme.css">
+</head>
+<body class="auth-page">
+    <div class="auth-panel">
+        <div class="logo-circle">🛡️</div>
+        <h1>Панель учёта</h1>
+        <p class="subtitle">Казань · граффити, заявки и карта</p>
+
+        {% if error %}
+        <div class="auth-error">{{ error }}</div>
+        {% endif %}
+
+        <form method="POST" action="/login" class="auth-fields">
+            <div class="field">
+                <label class="field-label" for="username">Логин</label>
+                <input type="text" id="username" name="username" required class="auth-input">
+            </div>
+            <div class="field">
+                <label class="field-label" for="password">Пароль</label>
+                <input type="password" id="password" name="password" required class="auth-input">
+            </div>
+            <button type="submit" class="auth-submit">Войти</button>
+        </form>
+    </div>
+</body>
+</html>

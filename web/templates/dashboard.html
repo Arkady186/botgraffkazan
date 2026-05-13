@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Панель управления — граффити · Казань</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/theme.css">
+</head>
+<body>
+    <div class="navbar">
+        <h1>🎨 Учёт граффити · Казань</h1>
+        <div>
+            <a href="/dashboard">Панель</a>
+            <a href="/reports">Заявки</a>
+            <a href="/archive">Архив</a>
+            <a href="/map">Карта</a>
+            <a href="/logout" class="logout">Выход</a>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="stats">
+            <div class="stat-card total">
+                <div class="number">{{ stats.total }}</div>
+                <div class="label">Всего заявок</div>
+            </div>
+            <div class="stat-card new">
+                <div class="number">{{ stats.new }}</div>
+                <div class="label">Новые</div>
+            </div>
+            <div class="stat-card in_progress">
+                <div class="number">{{ stats.in_progress }}</div>
+                <div class="label">В работе</div>
+            </div>
+            <div class="stat-card completed">
+                <div class="number">{{ stats.completed }}</div>
+                <div class="label">Завершено</div>
+            </div>
+            <a href="/archive" style="text-decoration: none;">
+                <div class="stat-card archived">
+                    <div class="number" style="color: #95a5a6">{{ stats.archived }}</div>
+                    <div class="label">🗄️ В архиве</div>
+                </div>
+            </a>
+        </div>
+        
+        <div class="content">
+            <div class="content-header">
+                <h2>Последние заявки</h2>
+                <a href="/reports" class="btn btn-primary">Все заявки</a>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Координаты</th>
+                        <th>Адрес</th>
+                        <th>Статус</th>
+                        <th>Дата</th>
+                        <th>Действие</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for report in reports %}
+                    <tr>
+                        <td>#{{ report.id }}</td>
+                        <td class="coords">{{ report.latitude }}, {{ report.longitude }}</td>
+                        <td>{{ report.address or 'Не указан' }}</td>
+                        <td>
+                            <span class="status {{ report.status }}">
+                                {{ status_labels.get(report.status, report.status) }}
+                            </span>
+                        </td>
+                        <td>{{ report.created_at[:16].replace('T', ' ') }}</td>
+                        <td>
+                            <a href="/report/{{ report.id }}" class="btn btn-primary btn-sm">
+                                Просмотр
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

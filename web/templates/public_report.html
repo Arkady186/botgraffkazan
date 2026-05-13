@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Заявка #{{ report.id }} — публично · Казань</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/theme.css">
+</head>
+<body>
+    <div class="navbar">
+        <h1>🎨 Заявка #{{ report.id }}</h1>
+        <div>
+            <a href="/">Главная</a>
+            <a href="/public-map">Карта</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="card" style="margin-bottom: 20px;">
+            <div class="card-header">Статус и данные</div>
+            <div class="card-body">
+                <div class="info-row">
+                    <span class="info-label">Статус</span>
+                    <span class="info-value">
+                        <span class="status {{ report.status }}">{{ status_labels.get(report.status, report.status) }}</span>
+                    </span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Координаты</span>
+                    <span class="info-value">{{ report.latitude }}, {{ report.longitude }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Адрес</span>
+                    <span class="info-value">{{ report.address or 'Не указан' }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Описание</span>
+                    <span class="info-value">{{ report.description or '—' }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Создана</span>
+                    <span class="info-value">{{ report.created_at[:16].replace('T', ' ') }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Обновлена</span>
+                    <span class="info-value">{{ report.updated_at[:16].replace('T', ' ') }}</span>
+                </div>
+            </div>
+        </div>
+
+        {% if media %}
+        <div class="card" style="margin-bottom: 20px;">
+            <div class="card-header">Материалы</div>
+            <div class="card-body">
+                <div class="media-grid">
+                    {% for m in media %}
+                    <div class="media-item">
+                        {% if m.file_type == 'photo' %}
+                        <img src="/media/{{ m.file_path }}" alt="Фото">
+                        {% else %}
+                        <video src="/media/{{ m.file_path }}" controls></video>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="card">
+            <div class="card-header">История статуса</div>
+            <div class="card-body">
+                {% if history %}
+                <ul class="history">
+                    {% for h in history %}
+                    <li class="history-item">
+                        <div class="status-change">
+                            {% if h.old_status %}
+                            {{ status_labels.get(h.old_status, h.old_status) }} →
+                            {% endif %}
+                            {{ status_labels.get(h.new_status, h.new_status) }}
+                        </div>
+                        {% if h.comment %}
+                        <div class="comment">💬 {{ h.comment }}</div>
+                        {% endif %}
+                        <div class="time">🕐 {{ h.created_at[:16].replace('T', ' ') }}</div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p style="color: var(--text-muted);">Пока без обновлений</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>

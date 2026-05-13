@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Сообщить о несанкционированном граффити в Казани — фото, карта заявок, связь с VK и Telegram.">
+    <title>Граффити · Казань — сообщить о нелегальных рисунках</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/theme.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body class="page-landing">
+
+    <header class="landing-hero">
+        <nav class="landing-nav">
+            <a class="landing-brand" href="/">Граффити · Казань</a>
+            <div class="landing-nav-actions">
+                {% if vk_group_url %}
+                <a href="{{ vk_group_url }}" class="btn-landing btn-outline-light" style="padding:10px 18px;font-size:0.8125rem" target="_blank" rel="noopener">VK сообщество</a>
+                {% endif %}
+                <a href="/login" class="btn-landing btn-outline-light" style="padding:10px 18px;font-size:0.8125rem">Вход</a>
+            </div>
+        </nav>
+        <div class="landing-hero-inner">
+            <h1>Вместе против несанкционированного граффити</h1>
+            <p class="lead">Сообщите о рисунке или надписи на фасаде, заборе или в подъезде: фото, координаты и короткий комментарий попадут в одну базу с заявками из VK и Telegram и отобразятся на карте для служб города.</p>
+            <div class="landing-buttons">
+                <a href="#report" class="btn-landing btn-fill">Сообщить о случае</a>
+                <a href="#map" class="btn-landing btn-outline-light">Карта</a>
+                <a href="/login" class="btn-landing btn-outline-light">Для комиссии</a>
+            </div>
+            <div class="landing-strip">
+                <span>Экстренно: </span><a href="tel:112">112</a>
+                {% if vk_group_url %}
+                <span> · </span><a href="{{ vk_group_url }}" target="_blank" rel="noopener">Напишите нам во VK</a>
+                {% endif %}
+                <span> · </span><a href="/public-map">Открыть публичную карту</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="landing-section">
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="icon" aria-hidden="true">⚡</div>
+                    <h3>Два минуты</h3>
+                    <p>Координаты с телефона в один тап и фото граффити — без лишних шагов.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon" aria-hidden="true">🗂️</div>
+                    <h3>Одна база</h3>
+                    <p>Сайт, сообщество во VK и панель операторов работают с одной базой — без дубликатов.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon" aria-hidden="true">🗺</div>
+                    <h3>Прозрачность</h3>
+                    <p>Публичная карта показывает статус точки и краткое описание — видно динамику уборки и покраски.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon" aria-hidden="true">🤝</div>
+                    <h3>Вместе</h3>
+                    <p>Каждое обращение помогает быстрее закрывать «грязные» точки на карте города.</p>
+                </div>
+            </div>
+
+            <div class="stats-panel">
+                <h2>Статус обращений</h2>
+                <div class="stats-public-grid" id="stats-grid">
+                    <div class="stat-pill">
+                        <div class="n" id="stat-total">0</div>
+                        <div class="lbl">Всего</div>
+                    </div>
+                    <div class="stat-pill">
+                        <div class="n" id="stat-new" style="color:#1976d2">0</div>
+                        <div class="lbl">Новые</div>
+                    </div>
+                    <div class="stat-pill">
+                        <div class="n" id="stat-progress" style="color:#f57c00">0</div>
+                        <div class="lbl">В работе</div>
+                    </div>
+                    <div class="stat-pill">
+                        <div class="n" id="stat-completed" style="color:#2e7d32">0</div>
+                        <div class="lbl">Завершено</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="map-public-wrap" id="map">
+                <h2>Карта обращений</h2>
+                <div id="public-map"></div>
+            </div>
+
+            <div class="form-panel" id="report">
+                <h2>Отправить сигнал</h2>
+                <p class="form-intro">Укажите точку (геолокация или широта/долгота) и приложите хотя бы одно фото граффити. Данные попадают в ту же базу, что и обращения из VK и Telegram.</p>
+                <div id="alert-container"></div>
+                <form id="report-form" enctype="multipart/form-data">
+                    <div class="field">
+                        <span class="field-label">География точки</span>
+                        <div class="coord-row">
+                            <input class="input flex-1" type="number" step="any" id="latitude" placeholder="Широта" required>
+                            <input class="input flex-1" type="number" step="any" id="longitude" placeholder="Долгота" required>
+                            <button type="button" class="btn btn-primary" onclick="getLocation()" style="white-space:nowrap">Моё местоположение</button>
+                        </div>
+                        <span class="field-hint">Браузер запросит разрешение; при отказе введите координаты вручную.</span>
+                    </div>
+                    <div class="field">
+                        <label class="field-label" for="address">Адрес (по желанию)</label>
+                        <input class="input" type="text" id="address" placeholder="Улица, дом, ориентир">
+                    </div>
+                    <div class="field">
+                        <label class="field-label" for="description">Комментарий</label>
+                        <textarea class="input" id="description" rows="4" placeholder="Что именно заметили, размер надписи, время…"></textarea>
+                    </div>
+                    <div class="field">
+                        <label class="field-label" for="photos">Файлы</label>
+                        <input type="file" id="photos" accept="image/*,video/*" multiple required class="input" style="padding:10px;background:#fff">
+                        <span class="field-hint">Можно несколько файлов; для обработки важнее всего качество фото.</span>
+                    </div>
+                    <div style="text-align:center;margin-top:28px">
+                        <button type="submit" class="btn-send">Отправить</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <strong>Учёт граффити · Казань</strong>
+        <div class="links">
+            Контакт экстренных служб: <a href="tel:112">112</a>
+            {% if vk_group_url %}
+            · Напишите нам: <a href="{{ vk_group_url }}" target="_blank" rel="noopener">сообщество VK</a>
+            {% endif %}
+        </div>
+        <small>Исходники проекта можно открыто разместить на GitHub; секретные ключи только в переменных окружения сервера, не в репозитории.</small>
+    </footer>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        async function loadStats() {
+            try {
+                const data = await (await fetch('/api/markers')).json();
+                const markers = data.markers || [];
+                document.getElementById('stat-total').textContent = markers.length;
+                document.getElementById('stat-new').textContent = markers.filter(m => m.status === 'new').length;
+                document.getElementById('stat-progress').textContent = markers.filter(m => m.status === 'in_progress').length;
+                document.getElementById('stat-completed').textContent = markers.filter(m => m.status === 'completed').length;
+            } catch (e) { console.error(e); }
+        }
+
+        function initMap() {
+            const map = L.map('public-map').setView([55.7961, 49.1064], 11);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap'
+            }).addTo(map);
+
+            fetch('/api/markers')
+                .then(r => r.json())
+                .then(data => {
+                    const markers = data.markers || [];
+                    const statusColors = { new:'#3498db', in_progress:'#f39c12', completed:'#27ae60', rejected:'#e74c3c' };
+                    const statusLabels = { new:'Новая', in_progress:'В работе', completed:'Завершена', rejected:'Отклонена' };
+
+                    markers.forEach(m => {
+                        const lat = m.latitude ?? m.lat;
+                        const lng = m.longitude ?? m.lng;
+                        if (lat == null || lng == null) return;
+
+                        const color = statusColors[m.status] || '#666';
+                        const icon = L.divIcon({
+                            className: '',
+                            html: `<div style="width:17px;height:17px;border-radius:50%;background:${color};border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.25)"></div>`,
+                            iconSize: [17, 17],
+                            iconAnchor: [8, 8]
+                        });
+                        const desc = m.description ? String(m.description).replace(/</g,'&lt;').slice(0,100) + (String(m.description).length>100?'…':'') : '';
+                        const popup = `
+                            <div style="padding:12px;font-family:Manrope,system-ui,sans-serif;max-width:220px;line-height:1.4;">
+                                <div style="font-weight:800;margin-bottom:6px;color:#1d3557">№ ${m.id}</div>
+                                <div style="font-size:13px;color:#5c6c80">${lat.toFixed(4)}, ${lng.toFixed(4)}</div>
+                                ${m.address ? `<div style="font-size:13px;margin-top:6px">🏠 ${String(m.address).replace(/</g,'&lt;')}</div>` : ''}
+                                ${desc ? `<div style="font-size:13px;margin-top:6px">${desc}</div>` : ''}
+                                <span style="display:inline-block;margin-top:8px;padding:4px 10px;background:${color};color:#fff;border-radius:999px;font-size:11px;font-weight:700">${statusLabels[m.status] || m.status}</span>
+                            </div>`;
+
+                        L.marker([lat, lng], { icon }).addTo(map).bindPopup(popup);
+                    });
+                });
+        }
+
+        function getLocation() {
+            if (!navigator.geolocation) {
+                showAlert('Геолокация недоступна в этом браузере.', 'error');
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    document.getElementById('latitude').value = pos.coords.latitude.toFixed(6);
+                    document.getElementById('longitude').value = pos.coords.longitude.toFixed(6);
+                    showAlert('Координаты подставлены.', 'success');
+                },
+                () => showAlert('Не удалось прочитать геопозицию — введите широту и долготу вручную.', 'error')
+            );
+        }
+
+        document.getElementById('report-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const fd = new FormData();
+            fd.append('latitude', document.getElementById('latitude').value);
+            fd.append('longitude', document.getElementById('longitude').value);
+            fd.append('address', document.getElementById('address').value);
+            fd.append('description', document.getElementById('description').value);
+            const photos = document.getElementById('photos').files;
+            for (let i = 0; i < photos.length; i++) fd.append('photos', photos[i]);
+
+            try {
+                const response = await fetch('/api/submit-report', { method: 'POST', body: fd });
+                const result = await response.json();
+                if (response.ok) {
+                    showAlert(`Заявка №${result.report_id} сохранена.`, 'success');
+                    document.getElementById('report-form').reset();
+                    loadStats();
+                    setTimeout(() => window.location.reload(), 1800);
+                } else {
+                    showAlert(result.error || 'Не удалось отправить.', 'error');
+                }
+            } catch (_) {
+                showAlert('Ошибка сети. Проверьте соединение и попробуйте снова.', 'error');
+            }
+        });
+
+        function showAlert(message, type) {
+            const wrap = document.getElementById('alert-container');
+            const el = document.createElement('div');
+            el.className = `alert alert-${type}`;
+            el.textContent = message;
+            el.style.display = 'block';
+            wrap.innerHTML = '';
+            wrap.appendChild(el);
+            setTimeout(() => el.remove(), 6000);
+        }
+
+        loadStats();
+        initMap();
+    </script>
+</body>
+</html>

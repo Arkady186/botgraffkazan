@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Архив — граффити · Казань</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/theme.css">
+</head>
+<body>
+    <div class="navbar">
+        <h1>🎨 Учёт граффити · Казань</h1>
+        <div>
+            <a href="/dashboard">Панель</a>
+            <a href="/reports">Заявки</a>
+            <a href="/archive">Архив</a>
+            <a href="/map">Карта</a>
+            <a href="/logout" class="logout">Выход</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="content">
+            <div class="content-header">
+                <h2>🗄️ Архив удалённых заявок</h2>
+                <p>Заявки хранятся в архиве 30 дней, затем удаляются автоматически</p>
+            </div>
+
+            <div class="archive-notice">
+                ⚠️ Заявки в архиве будут автоматически удалены через 30 дней после удаления.
+                Восстановление заявок невозможно.
+            </div>
+
+            {% if archived %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Координаты</th>
+                        <th>Адрес</th>
+                        <th>Статус</th>
+                        <th>Фото</th>
+                        <th>Удалено</th>
+                        <th>Автоудаление</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for report in archived %}
+                    <tr>
+                        <td>#{{ report.report_id or report.id }}</td>
+                        <td class="coords">
+                            {{ "%.4f"|format(report.latitude) }}, {{ "%.4f"|format(report.longitude) }}
+                        </td>
+                        <td>{{ report.address or '-' }}</td>
+                        <td>
+                            <span class="status {{ report.status }}">
+                                {{ status_labels.get(report.status, report.status) }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if report.media %}
+                            <div class="media-preview">
+                                {% for m in report.media[:3] %}
+                                    {% if m.file_type == 'photo' %}
+                                    <img src="/media/{{ m.file_path }}" alt="foto">
+                                    {% else %}
+                                    <video src="/media/{{ m.file_path }}"></video>
+                                    {% endif %}
+                                {% endfor %}
+                                {% if report.media|length > 3 %}
+                                <span style="font-size: 12px; color: #666;">+{{ report.media|length - 3 }}</span>
+                                {% endif %}
+                            </div>
+                            {% else %}
+                            -
+                            {% endif %}
+                        </td>
+                        <td>{{ report.deleted_at[:16].replace('T', ' ') if report.deleted_at else '-' }}</td>
+                        <td class="delete-date">
+                            {{ report.auto_delete_date[:10] if report.auto_delete_date else '30 дней' }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="no-data">
+                <p>📭 Архив пуст</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

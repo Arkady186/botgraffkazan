@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Карта граффити — Казань</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/theme.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body>
+    <div class="navbar">
+        <h1>🗺️ Карта граффити — Казань</h1>
+        <div>
+            <a href="/dashboard">Панель</a>
+            <a href="/reports">Заявки</a>
+            <a href="/map">Карта</a>
+            <a href="/logout" class="logout">Выход</a>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="stats-bar" id="statsBar">
+            <!-- Статистика будет загружена сюда -->
+        </div>
+        
+        <div class="legend">
+            <strong>📍 Статусы:</strong>
+            <div class="legend-item">
+                <div class="legend-dot new"></div>
+                <span>🆕 Новая</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot in_progress"></div>
+                <span>⏳ В работе</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot completed"></div>
+                <span>✅ Завершена</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot rejected"></div>
+                <span>❌ Отклонена</span>
+            </div>
+        </div>
+        
+        <div id="map"></div>
+    </div>
+    
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        const markers = {{ markers | safe }};
+        const statusLabels = {
+            'new': '🆕 Новая',
+            'in_progress': '⏳ В работе',
+            'completed': '✅ Завершена',
+            'rejected': '❌ Отклонена'
+        };
+        
+        // Статистика
+        const stats = {
+            total: markers.length,
+            new: markers.filter(m => m.status === 'new').length,
+            in_progress: markers.filter(m => m.status === 'in_progress').length,
+            completed: markers.filter(m => m.status === 'completed').length,
+            rejected: markers.filter(m => m.status === 'rejected').length
+        };
+        
+        // Отображаем статистику
+        document.getElementById('statsBar').innerHTML = `
+            <div class="stat-item">
+                <div class="number">${stats.total}</div>
+                <div class="label">Всего</div>
+            </div>
+            <div class="stat-item">
+                <div class="number" style="color: #3498db">${stats.new}</div>
+                <div class="label">Новые</div>
+            </div>
+            <div class="stat-item">
+                <div class="number" style="color: #f39c12">${stats.in_progress}</div>
+                <div class="label">В работе</div>
+            </div>
+            <div class="stat-item">
+                <div class="number" style="color: #27ae60">${stats.completed}</div>
+                <div class="label">Завершено</div>
+            </div>
+            <div class="stat-item">
+                <div class="number" style="color: #e74c3c">${stats.rejected}</div>
+                <div class="label">Отклонено</div>
+            </div>
+        `;
+        
+        // Инициализация карты (центр Казани)
+        const map = L.map('map').setView([55.7961, 49.1064], 11);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+        
+        // Функция для получения цвета маркера
+        function getMarkerColor(status) {
+            const colors = {
+                'new': '#3498db',
+                'in_progress': '#f39c12',
+                'completed': '#27ae60',
+                'rejected': '#e74c3c'
+            };
+            return colors[status] || '#666';
+        }
+        
+        // Создаём кастомные иконки
+        function createIcon(status) {
+            const color = getMarkerColor(status);
+            return L.divIcon({
+                className: 'custom-marker',
+                html: `<div style="
+                    width: 20px;
+                    height: 20px;
+                    border-radius: 50%;
+                    background: ${color};
+                    border: 3px solid white;
+                    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+                "></div>`,
+                iconSize: [20, 20],
+                iconAnchor: [10, 10]
+            });
+        }
+        
+        // Добавляем маркеры
+        markers.forEach(marker => {
+            const descRaw = marker.description ? String(marker.description) : '';
+            const descShort = descRaw.length > 120 ? descRaw.slice(0, 117) + '…' : descRaw;
+            const descBlock = descShort
+                ? `<p title="${descRaw.replace(/"/g, '&quot;')}">📝 ${descShort.replace(/</g, '&lt;')}</p>`
+                : '';
+            const popupContent = `
+                <div class="popup-content">
+                    <h4>Заявка #${marker.id}</h4>
+                    <p>📍 ${marker.latitude}, ${marker.longitude}</p>
+                    <p>🏠 ${(marker.address || 'Адрес не указан').replace(/</g, '&lt;')}</p>
+                    ${descBlock}
+                    <p>📅 ${marker.created_at ? marker.created_at.slice(0, 16).replace('T', ' ') : ''}</p>
+                    <span class="status ${marker.status}">${statusLabels[marker.status] || marker.status}</span>
+                    <br>
+                    <a href="/public-report/${marker.id}" target="_blank" rel="noopener">→ Подробнее</a>
+                </div>
+            `;
+
+            const lat = marker.latitude ?? marker.lat;
+            const lng = marker.longitude ?? marker.lng;
+            L.marker([lat, lng], { icon: createIcon(marker.status) })
+                .addTo(map)
+                .bindPopup(popupContent);
+        });
+    </script>
+</body>
+</html>
