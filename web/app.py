@@ -45,7 +45,7 @@ _templates_dir = Path(__file__).resolve().parent / "templates"
 _static_dir = Path(__file__).resolve().parent / "static"
 _static_dir.mkdir(parents=True, exist_ok=True)
 app.mount("/static", StaticFiles(directory=str(_static_dir)), name="static")
-templates = Jinja2Templates(directory=str(_templates_dir))
+templates = Jinja2Templates(directory=str(_templates_dir.absolute()))
 
 # Простая аутентификация
 security = HTTPBasic()
