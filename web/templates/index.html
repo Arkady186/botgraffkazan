@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Сообщить о несанкционированном граффити в Казани — фото, карта заявок, связь с VK и Telegram.">
+    <meta name="description" content="Сообщить о несанкционированном граффити в Казани — фото, карта заявок, связь с VK.">
     <title>Граффити · Казань — сообщить о нелегальных рисунках</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -25,18 +25,18 @@
         </nav>
         <div class="landing-hero-inner">
             <h1>Вместе против несанкционированного граффити</h1>
-            <p class="lead">Сообщите о рисунке или надписи на фасаде, заборе или в подъезде: фото, координаты и короткий комментарий попадут в одну базу с заявками из VK и Telegram и отобразятся на карте для служб города.</p>
+            <p class="lead">Сообщите о рисунке или надписи на фасаде, заборе или в подъезде: фото, координаты и короткий комментарий попадут в одну базу с заявками из VK и отобразятся на карте для служб города.</p>
             <div class="landing-buttons">
                 <a href="#report" class="btn-landing btn-fill">Сообщить о случае</a>
                 <a href="#map" class="btn-landing btn-outline-light">Карта</a>
-                <a href="/login" class="btn-landing btn-outline-light">Для комиссии</a>
+                <a href="https://vk.com/club237275854" class="btn-landing btn-outline-light" target="_blank" rel="noopener">Сообщество VK</a>
             </div>
             <div class="landing-strip">
-                <span>Экстренно: </span><a href="tel:112">112</a>
                 {% if vk_group_url %}
-                <span> · </span><a href="{{ vk_group_url }}" target="_blank" rel="noopener">Напишите нам во VK</a>
+                <a href="{{ vk_group_url }}" target="_blank" rel="noopener">Напишите нам во VK</a>
+                <span> · </span>
                 {% endif %}
-                <span> · </span><a href="/public-map">Открыть публичную карту</a>
+                <a href="/public-map">Открыть публичную карту</a>
             </div>
         </div>
     </header>
@@ -46,23 +46,23 @@
             <div class="features-grid">
                 <div class="feature-card">
                     <div class="icon" aria-hidden="true">⚡</div>
-                    <h3>Два минуты</h3>
-                    <p>Координаты с телефона в один тап и фото граффити — без лишних шагов.</p>
+                    <h3>Быстро</h3>
+                    <p>Определите координаты одним нажатием и загрузите фото граффити — процесс занимает всего пару минут.</p>
                 </div>
                 <div class="feature-card">
                     <div class="icon" aria-hidden="true">🗂️</div>
-                    <h3>Одна база</h3>
-                    <p>Сайт, сообщество во VK и панель операторов работают с одной базой — без дубликатов.</p>
+                    <h3>Единая база</h3>
+                    <p>Все обращения с сайта, сообщества VK и панели операторов попадают в общую базу данных — никаких дубликатов.</p>
                 </div>
                 <div class="feature-card">
                     <div class="icon" aria-hidden="true">🗺</div>
                     <h3>Прозрачность</h3>
-                    <p>Публичная карта показывает статус точки и краткое описание — видно динамику уборки и покраски.</p>
+                    <p>Публичная карта отображает статус каждой точки и краткое описание, позволяя отслеживать прогресс уборки и покраски.</p>
                 </div>
                 <div class="feature-card">
                     <div class="icon" aria-hidden="true">🤝</div>
-                    <h3>Вместе</h3>
-                    <p>Каждое обращение помогает быстрее закрывать «грязные» точки на карте города.</p>
+                    <h3>Сообщество</h3>
+                    <p>Каждое ваше сообщение помогает быстрее устранять нелегальные граффити и делать город чище.</p>
                 </div>
             </div>
 
@@ -95,7 +95,7 @@
 
             <div class="form-panel" id="report">
                 <h2>Отправить сигнал</h2>
-                <p class="form-intro">Укажите точку (геолокация или широта/долгота) и приложите хотя бы одно фото граффити. Данные попадают в ту же базу, что и обращения из VK и Telegram.</p>
+                <p class="form-intro">Укажите точку (геолокация или широта/долгота) и приложите хотя бы одно фото граффити. Данные попадают в ту же базу, что и обращения из VK.</p>
                 <div id="alert-container"></div>
                 <form id="report-form" enctype="multipart/form-data">
                     <div class="field">
@@ -131,9 +131,8 @@
     <footer class="site-footer">
         <strong>Учёт граффити · Казань</strong>
         <div class="links">
-            Контакт экстренных служб: <a href="tel:112">112</a>
             {% if vk_group_url %}
-            · Напишите нам: <a href="{{ vk_group_url }}" target="_blank" rel="noopener">сообщество VK</a>
+            Напишите нам: <a href="{{ vk_group_url }}" target="_blank" rel="noopener">сообщество VK</a>
             {% endif %}
         </div>
         <small>Исходники проекта можно открыто разместить на GitHub; секретные ключи только в переменных окружения сервера, не в репозитории.</small>
