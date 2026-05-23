@@ -23,6 +23,11 @@ MEDIA_PATH = os.getenv("MEDIA_PATH", "/tmp/media")
 Path(MEDIA_PATH).mkdir(parents=True, exist_ok=True)
 SECRET_KEY = os.getenv("SECRET_KEY", "dev_secret_key_change_in_production")
 
+# Подключение к PostgreSQL (если задано)
+DATABASE_URL = os.getenv("DATABASE_URL", "")
+# Флаг использования PostgreSQL
+USE_POSTGRES = bool(DATABASE_URL)
+
 # Прокси для Telegram (если нужен)
 # Формат: http://user:pass@proxy:port или socks5://user:pass@proxy:port
 TELEGRAM_PROXY = os.getenv("TELEGRAM_PROXY", None)
